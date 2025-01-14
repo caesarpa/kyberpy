@@ -1,0 +1,9 @@
+n = 256       # Bit length of the key in the CCA scheme. In the CPA scheme, this sets the bit length of a message that can be encrypted in a single operation.
+k = 2         # Dimension of the Module-LWE problem. Changing this value is the main mechanism of scaling the trade off between security and effiiency.
+q = 3329      # The modulus for operations. This prime number allows for efficient NTT transform while having a negligeble decryption failure probability.
+η1 = 3        # Noise parameter to sample s and e in the CPA KeyGen algorithm, as well as for r in the CPA Encryption algorithm.
+η2 = 2        # Noise parameter to sample e1 and e2 in the CCA Encryption algorithm.
+du = 10       #
+dv = 4        #
+δ = 2**(-139) #
+zeta = 17
