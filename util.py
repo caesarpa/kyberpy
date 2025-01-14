@@ -97,7 +97,7 @@ def byteEncode(f, d):
             a = (a - b[i * d + j]) // 2  # Update a (divide by 2)
     
     B = bitsToBytes(b)  # Convert bits to bytes
-    return B
+    return bytes(B)
 
 def byteDecode(B, d):
     m = 2**d if d < 12 else q  # Calculate m based on d

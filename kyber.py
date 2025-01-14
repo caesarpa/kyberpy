@@ -106,6 +106,8 @@ def PKE_Encrypt(ek, m: bytes, r: bytes):
     return [c1, c2]
 
 def PKE_Decrypt(dk, c):
+    c = [c[0][:], c[1][:]] #copy c to avoid modifying the original
+
     c1 = c[0]
     c2 = c[1]
 
@@ -137,4 +139,63 @@ def PKE_Decrypt(dk, c):
         w[i] = compress(w[i], 1)
     
     m = byteEncode(w, 1)
-    return m # TODO this is bytes, make sure its correct to do so
+    return m
+
+
+def ML_KEM_KEYGEN_INTERNAL(d, z):
+    ek, dk = PKE_CPA_KeyGen(d)
+
+    ek_bytes = b''
+    for i in range(k):
+        ek_bytes += byteEncode(ek[0][i], 12)
+    ek_bytes += ek[1]
+
+    dk = [dk, ek, H(ek_bytes), z]
+
+    return ek, dk
+
+def ML_KEM_ENCAPS(ek, m):
+
+    ek_bytes = b''
+    for i in range(k):
+        ek_bytes += byteEncode(ek[0][i], 12)
+    ek_bytes += ek[1]
+
+    K, r = G(m + H(ek_bytes))
+
+    c = PKE_Encrypt(ek, m, r)
+
+    return K, c
+
+def ML_KEM_DECAPS(dk_ML, c):
+
+    dk = dk_ML[0]
+    ek = dk_ML[1]
+    h = dk_ML[2]
+    z = dk_ML[3]
+    m = PKE_Decrypt(dk, c)
+
+    K_prime, r_prime = G(m + h)
+    c_bytes = b'' #Transform c into byte form to pass into J
+    for i in range(k):
+        c_bytes += c[0][i]
+    c_bytes += c[1]
+
+    K_line = J(z + c_bytes)
+    c_prime = PKE_Encrypt(ek, m, r_prime)
+    if c == c_prime:
+        print("Success")
+        return K_prime
+    else:
+        print("Failure")
+        return K_line
+
+#Test decaps
+d = os.urandom(32)
+z = os.urandom(32)
+ek, dk = ML_KEM_KEYGEN_INTERNAL(d, z)
+m = os.urandom(32)
+K, c = ML_KEM_ENCAPS(ek, m)
+K_prime = ML_KEM_DECAPS(dk, c)
+print(K_prime)
+print(len(K_prime))
